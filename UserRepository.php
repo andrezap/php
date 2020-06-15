@@ -12,7 +12,7 @@ class UserRepository
         $this->db = new DB();
     }
 
-    public function save($name, $email) : ?User
+    public function save($name, $email): ?User
     {
         try {
             $connection = $this->db->getConnection();
@@ -32,8 +32,58 @@ class UserRepository
         return null;
     }
 
-    public function listAll()
+    public function listAll(): ?array
     {
+        try {
+            $connection = $this->db->getConnection();
+            $query = 'SELECT * FROM users';
+            $statement = $connection->prepare($query);
+            $statement->execute();
 
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $exception) {
+            echo $exception->getMessage();
+        }
+
+        return null;
+    }
+
+    public function exist(string $email): bool
+    {
+        try {
+            $connection = $this->db->getConnection();
+            $query = 'SELECT COUNT(*) as count FROM users WHERE email = :email';
+            $statement = $connection->prepare($query);
+            $statement->execute(
+                [
+                    'email' => $email
+                ]
+            );
+
+            $result = $statement->fetch();
+
+            return $result['count'] > 0;
+        } catch (Exception $exception) {
+            echo $exception->getMessage();
+        }
+
+        return true;
+    }
+
+    public function update(string $name, string $email): void
+    {
+        try {
+            $connection = $this->db->getConnection();
+            $query = 'UPDATE users SET name = :name WHERE email = :email';
+            $statement = $connection->prepare($query);
+            $statement->execute(
+                [
+                    'email' => $email,
+                    'name' => $name
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $exception->getMessage();
+        }
     }
 }
